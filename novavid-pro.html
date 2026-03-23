@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NovaVid AI — Pro Video Generator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#06060e;--bg2:#0c0c1a;--surface:#111125;--surface2:#181836;--card:#14142e;
+  --border:rgba(124,58,237,0.12);--border2:rgba(124,58,237,0.25);
+  --accent:#7c3aed;--accent2:#a78bfa;--accent3:#c084fc;--accent4:#e9d5ff;
+  --glow:0 0 20px rgba(124,58,237,0.25);--glow2:0 0 40px rgba(124,58,237,0.15);
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --success:#10b981;--danger:#ef4444;--warning:#f59e0b;--info:#3b82f6;
+  --r:14px;--r2:10px;--r3:8px;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(124,58,237,0.06) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px}
+
+/* App Shell */
+.app{max-width:1200px;margin:0 auto;padding:12px;position:relative;z-index:1}
+
+/* Header */
+.header{text-align:center;padding:15px 0 20px}
+.logo{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#a78bfa,#c084fc,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+.logo-sub{font-size:.72rem;color:var(--text3);margin-top:2px;letter-spacing:2px;text-transform:uppercase}
+
+/* Tags */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:600}
+.tag-free{background:rgba(16,185,129,0.12);color:var(--success);border:1px solid rgba(16,185,129,0.2)}
+.tag-pro{background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.2)}
+.tag-ai{background:rgba(59,130,246,0.12);color:var(--info);border:1px solid rgba(59,130,246,0.2)}
+.tag-live{background:rgba(239,68,68,0.12);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
+
+/* Layout */
+.main-grid{display:grid;grid-template-columns:380px 1fr;gap:14px}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}}
+
+/* Panels */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;backdrop-filter:blur(10px)}
+.panel::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.5}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.panel-title{font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:7px}
+.panel-title .icon{font-size:1rem}
+
+/* Tabs */
+.tabs{display:flex;background:var(--bg2);border-radius:var(--r3);padding:3px;gap:2px;margin-bottom:14px}
+.tab{flex:1;padding:7px 4px;border:none;background:transparent;color:var(--text3);font-size:.72rem;font-weight:600;border-radius:6px;cursor:pointer;transition:.2s;font-family:inherit}
+.tab.active{background:var(--accent);color:#fff;box-shadow:var(--glow)}
+
+/* Form Controls */
+label{display:block;font-size:.68rem;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--r3);color:var(--text);padding:10px 12px;font-size:.84rem;resize:vertical;min-height:80px;font-family:inherit;transition:.2s;line-height:1.5}
+textarea:focus{outline:none;border-color:var(--accent);box-shadow:var(--glow)}
+textarea::placeholder{color:var(--text3)}
+select,input[type="text"],input[type="number"],input[type="url"]{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--r3);color:var(--text);padding:9px 11px;font-size:.82rem;transition:.2s;font-family:inherit}
+select:focus,input:focus{outline:none;border-color:var(--accent)}
+input[type="color"]{width:100%;height:36px;border:1px solid var(--border);border-radius:var(--r3);background:var(--bg);cursor:pointer;padding:2px}
+.field{margin-bottom:10px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* Preset Chips */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:.68rem;color:var(--text2);cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap}
+.chip:hover,.chip:active{border-color:var(--accent);color:var(--accent2)}
+
+/* Style Grid */
+.style-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.style-btn{background:var(--bg);border:1px solid var(--border);border-radius:var(--r3);color:var(--text2);padding:8px 4px;cursor:pointer;font-size:.68rem;text-align:center;transition:.2s;font-family:inherit}
+.style-btn:hover{border-color:var(--accent);color:var(--text)}
+.style-btn.active{background:rgba(124,58,237,0.12);border-color:var(--accent);color:var(--accent2);box-shadow:var(--glow)}
+.style-btn .si{font-size:1.3rem;display:block;margin-bottom:2px}
+
+/* Ratio Selector */
+.ratio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ratio-btn{background:var(--bg);border:1px solid var(--border);border-radius:var(--r3);color:var(--text2);padding:8px 4px;cursor:pointer;font-size:.68rem;text-align:center;transition:.2s;font-family:inherit}
+.ratio-btn:hover{border-color:var(--accent)}
+.ratio-btn.active{background:rgba(124,58,237,0.12);border-color:var(--accent);color:var(--accent2)}
+.ratio-btn .ri{display:block;margin:0 auto 3px;border:1.5px solid var(--text3);border-radius:2px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border:none;border-radius:var(--r3);font-size:.84rem;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit;width:100%;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;box-shadow:var(--glow)}
+.btn-primary:hover{box-shadow:var(--glow2);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-success{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+.btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff}
+.btn-outline{background:transparent;color:var(--accent2);border:1px solid var(--border2)}
+.btn-outline:hover{background:rgba(124,58,237,0.08)}
+.btn-sm{padding:7px 14px;font-size:.75rem}
+.btn-icon{width:36px;height:36px;padding:0;flex-shrink:0}
+
+/* Preview */
+.preview-wrap{position:relative;width:100%;background:#000;border-radius:var(--r3);overflow:hidden;aspect-ratio:16/9}
+.preview-wrap.r916{aspect-ratio:9/16}
+.preview-wrap.r11{aspect-ratio:1/1}
+.preview-wrap.r43{aspect-ratio:4/3}
+.preview-wrap.r21{aspect-ratio:2/1}
+.preview-wrap.r239{aspect-ratio:2.39/1}
+.preview-canvas{width:100%;height:100%;display:block}
+video{width:100%;height:100%;object-fit:contain}
+.wmark{position:absolute;bottom:6px;right:10px;font-size:.55rem;color:rgba(255,255,255,.1);pointer-events:none}
+.preview-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);font-size:.8rem;gap:8px}
+.preview-ph .phi{font-size:2rem;opacity:.3}
+
+/* Progress */
+.prog-wrap{margin:10px 0}
+.prog-bar{width:100%;height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#c084fc);border-radius:3px;transition:width .3s;width:0%}
+.prog-info{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text3);margin-top:4px}
+.status{font-size:.75rem;color:var(--text2);text-align:center;min-height:20px;line-height:20px}
+
+/* Stats */
+.stats{display:flex;justify-content:center;gap:24px;margin-top:8px}
+.stat{text-align:center}
+.stat-val{font-size:1rem;font-weight:700;color:var(--accent2)}
+.stat-lbl{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+
+/* Log */
+.log{background:var(--bg);border-radius:var(--r3);padding:8px 10px;max-height:120px;overflow-y:auto;font-family:'SF Mono',Monaco,Consolas,monospace;font-size:.68rem;color:var(--text3);line-height:1.7}
+.log div{border-bottom:1px solid rgba(255,255,255,.02);padding:1px 0}
+
+/* Toggle */
+.toggle{position:relative;width:34px;height:18px;display:inline-block;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle .sl{position:absolute;inset:0;background:var(--bg);border-radius:9px;border:1px solid var(--border);cursor:pointer;transition:.2s}
+.toggle .sl::before{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;background:var(--text3);border-radius:50%;transition:.2s}
+.toggle input:checked+.sl{background:rgba(124,58,237,0.25);border-color:var(--accent)}
+.toggle input:checked+.sl::before{transform:translateX(16px);background:var(--accent2)}
+
+/* Collapsible */
+.collapse-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0;user-select:none}
+.collapse-head .ch-text{font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:6px}
+.collapse-head .ch-arrow{font-size:.6rem;color:var(--text3);transition:.2s}
+.collapse-head.open .ch-arrow{transform:rotate(180deg)}
+.collapse-body{max-height:0;overflow:hidden;transition:max-height .3s ease}
+.collapse-body.open{max-height:800px}
+
+/* Section divider */
+.sep{height:1px;background:var(--border);margin:12px 0}
+
+/* API Provider Cards */
+.provider{background:var(--bg);border:1px solid var(--border);border-radius:var(--r3);padding:10px;margin-bottom:8px;transition:.2s}
+.provider.active{border-color:var(--accent);box-shadow:var(--glow)}
+.provider-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.provider-name{font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:6px}
+
+/* Model selector */
+.model-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.model-chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:.65rem;color:var(--text2);cursor:pointer;transition:.15s;font-family:inherit}
+.model-chip:hover{border-color:var(--accent)}
+.model-chip.active{background:rgba(124,58,237,0.15);border-color:var(--accent);color:var(--accent2)}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-in{animation:fadeIn .4s ease}
+.loading{animation:pulse 1.5s infinite}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+
+/* Mobile Optimizations */
+@media(max-width:600px){
+  .app{padding:8px}
+  .logo{font-size:1.6rem}
+  .panel{padding:12px}
+  .style-grid{grid-template-columns:repeat(3,1fr)}
+  .field-row,.field-row-3{grid-template-columns:1fr 1fr}
+  .ratio-grid{grid-template-columns:repeat(4,1fr)}
+  .stats{gap:14px}
+  .main-grid{gap:10px}
+}
+
+/* Hidden util */
+.hidden{display:none!important}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r3);padding:8px 18px;font-size:.78rem;color:var(--text);z-index:999;animation:fadeIn .3s ease;box-shadow:var(--glow2)}
+.toast-success{border-color:rgba(16,185,129,.4);color:var(--success)}
+.toast-error{border-color:rgba(239,68,68,.4);color:var(--danger)}
+
+/* SVG Preview */
+.svg-preview{width:100%;background:var(--bg);border-radius:var(--r3);border:1px solid var(--border);overflow:hidden;min-height:100px;display:flex;align-items:center;justify-content:center}
+.svg-preview svg{max-width:100%;max-height:300px}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">⚡ NovaVid AI</div>
+    <div class="logo-sub">AI-Powered Video & Motion Graphics Generator</div>
+    <div style="margin-top:6px;display:flex;justify-content:center;gap:6px">
+      <span class="tag tag-ai">🤖 AI Models</span>
+      <span class="tag tag-free">⚡ Free</span>
+      <span class="tag tag-pro">🎬 HD Output</span>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Left Column: Controls -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- Prompt Panel -->
+      <div class="panel fade-in">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">✍️</span> Prompt</div>
+          <span class="tag tag-ai">AI Enhanced</span>
+        </div>
+        <div class="field">
+          <textarea id="prompt" placeholder="Describe your video... e.g. &#34;Futuristic city with neon lights at night, cinematic camera movement&#34;"></textarea>
+        </div>
+        <div class="chips">
+          <button class="chip" onclick="setP('Cyberpunk city with neon signs, rain reflections')">🏙️ Cyberpunk</button>
+          <button class="chip" onclick="setP('Deep space nebula with swirling purple and blue galaxies')">🌌 Nebula</button>
+          <button class="chip" onclick="setP('Cherry blossoms falling in gentle spring wind')">🌸 Sakura</button>
+          <button class="chip" onclick="setP('Massive ocean waves crashing at golden hour')">🌊 Waves</button>
+          <button class="chip" onclick="setP('Aurora borealis dancing over snowy mountains')">🏔️ Aurora</button>
+          <button class="chip" onclick="setP('Magical fireflies in enchanted dark forest')">✨ Forest</button>
+          <button class="chip" onclick="setP('Lava flowing into crystal blue ocean, smoke rising')">🌋 Lava</button>
+          <button class="chip" onclick="setP('Abstract geometric shapes morphing in void')">🔷 Abstract</button>
+          <button class="chip" onclick="setP('Welcome to my channel! Subscribe for more')">📢 Intro</button>
+          <button class="chip" onclick="setP('Luxury brand advertisement, minimalist elegance')">💎 Ad</button>
+        </div>
+      </div>
+
+      <!-- Style Panel -->
+      <div class="panel fade-in" style="animation-delay:.05s">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">🎨</span> Visual Style</div>
+        </div>
+        <div class="style-grid" id="styleGrid">
+          <button class="style-btn active" data-s="cinematic" onclick="pickStyle(this)"><span class="si">🎬</span>Cinematic</button>
+          <button class="style-btn" data-s="particles" onclick="pickStyle(this)"><span class="si">✨</span>Particles</button>
+          <button class="style-btn" data-s="gradient" onclick="pickStyle(this)"><span class="si">🎨</span>Gradient</button>
+          <button class="style-btn" data-s="typography" onclick="pickStyle(this)"><span class="si">✏️</span>Type</button>
+          <button class="style-btn" data-s="waves" onclick="pickStyle(this)"><span class="si">🌊</span>Waves</button>
+          <button class="style-btn" data-s="matrix" onclick="pickStyle(this)"><span class="si">💻</span>Matrix</button>
+          <button class="style-btn" data-s="fire" onclick="pickStyle(this)"><span class="si">🔥</span>Fire</button>
+          <button class="style-btn" data-s="stars" onclick="pickStyle(this)"><span class="si">⭐</span>Stars</button>
+          <button class="style-btn" data-s="geometric" onclick="pickStyle(this)"><span class="si">🔷</span>Geo</button>
+          <button class="style-btn" data-s="liquid" onclick="pickStyle(this)"><span class="si">🫧</span>Liquid</button>
+          <button class="style-btn" data-s="glitch" onclick="pickStyle(this)"><span class="si">📡</span>Glitch</button>
+          <button class="style-btn" data-s="retro" onclick="pickStyle(this)"><span class="si">🕹️</span>Retro</button>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div class="panel fade-in" style="animation-delay:.1s">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">⚙️</span> Settings</div>
+        </div>
+
+        <!-- Aspect Ratio -->
+        <div class="field">
+          <label>Aspect Ratio</label>
+          <div class="ratio-grid" id="ratioGrid">
+            <button class="ratio-btn active" data-r="16:9" onclick="pickRatio(this)"><span class="ri" style="width:28px;height:16px"></span>16:9</button>
+            <button class="ratio-btn" data-r="9:16" onclick="pickRatio(this)"><span class="ri" style="width:14px;height:24px"></span>9:16</button>
+            <button class="ratio-btn" data-r="1:1" onclick="pickRatio(this)"><span class="ri" style="width:20px;height:20px"></span>1:1</button>
+            <button class="ratio-btn" data-r="4:3" onclick="pickRatio(this)"><span class="ri" style="width:24px;height:18px"></span>4:3</button>
+            <button class="ratio-btn" data-r="21:9" onclick="pickRatio(this)"><span class="ri" style="width:32px;height:12px"></span>21:9</button>
+            <button class="ratio-btn" data-r="2.39:1" onclick="pickRatio(this)"><span class="ri" style="width:32px;height:13px"></span>2.39:1</button>
+            <button class="ratio-btn" data-r="3:4" onclick="pickRatio(this)"><span class="ri" style="width:16px;height:22px"></span>3:4</button>
+            <button class="ratio-btn" data-r="4:5" onclick="pickRatio(this)"><span class="ri" style="width:16px;height:20px"></span>4:5</button>
+          </div>
+        </div>
+
+        <div class="field-row-3">
+          <div class="field">
+            <label>Duration</label>
+            <select id="duration">
+              <option value="3">3 sec</option>
+              <option value="5" selected>5 sec</option>
+              <option value="8">8 sec</option>
+              <option value="10">10 sec</option>
+              <option value="15">15 sec</option>
+              <option value="30">30 sec</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Quality</label>
+            <select id="quality">
+              <option value="480">SD 480p</option>
+              <option value="720" selected>HD 720p</option>
+              <option value="1080">FHD 1080p</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>FPS</label>
+            <select id="fps">
+              <option value="15">15</option>
+              <option value="24">24</option>
+              <option value="30" selected>30</option>
+              <option value="60">60</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Text Size</label>
+            <input type="number" id="fontSize" value="42" min="12" max="120">
+          </div>
+          <div class="field">
+            <label>Text Color</label>
+            <input type="color" id="textColor" value="#ffffff">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Speed</label>
+            <select id="speed">
+              <option value="0.5">Slow</option>
+              <option value="1" selected>Normal</option>
+              <option value="1.5">Fast</option>
+              <option value="2">Very Fast</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Background</label>
+            <select id="bgColor">
+              <option value="#0a0a1a">Dark</option>
+              <option value="#1a0a2e">Purple Dark</option>
+              <option value="#000000">Pure Black</option>
+              <option value="#0a1628">Navy</option>
+              <option value="#1a1a1a">Charcoal</option>
+              <option value="#ffffff">White</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Provider Panel -->
+      <div class="panel fade-in" style="animation-delay:.15s">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">🤖</span> AI Provider</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <label class="toggle"><input type="checkbox" id="aiEnabled" onchange="toggleAI()"><span class="sl"></span></label>
+            <span style="font-size:.7rem;color:var(--text3)">Enable AI</span>
+          </div>
+        </div>
+
+        <div id="aiConfig" class="hidden">
+          <!-- NVIDIA -->
+          <div class="provider" id="prov-nvidia">
+            <div class="provider-head">
+              <div class="provider-name">🟢 NVIDIA <span class="tag tag-ai">Recommended</span></div>
+              <label class="toggle"><input type="checkbox" id="useNvidia" onchange="selectProvider('nvidia')" checked><span class="sl"></span></label>
+            </div>
+            <div class="field">
+              <label>API Endpoint</label>
+              <input type="text" id="nvidiaEndpoint" value="https://integrate.api.nvidia.com/v1/chat/completions" placeholder="NVIDIA API endpoint">
+            </div>
+            <div class="field">
+              <label>API Key</label>
+              <input type="text" id="nvidiaKey" placeholder="nvapi-xxxxxxxxxxxxxxx" type="password">
+            </div>
+            <div class="field">
+              <label>Model</label>
+              <select id="nvidiaModel">
+                <option value="nvidia/llama-3.1-nemotron-70b-instruct">Llama 3.1 Nemotron 70B</option>
+                <option value="meta/llama-3.1-405b-instruct">Llama 3.1 405B</option>
+                <option value="meta/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+                <option value="meta/llama-3.1-8b-instruct">Llama 3.1 8B</option>
+                <option value="mistralai/mixtral-8x22b-instruct-v0.1">Mixtral 8x22B</option>
+                <option value="mistralai/mistral-large-2-instruct">Mistral Large 2</option>
+                <option value="google/gemma-2-9b-it">Gemma 2 9B</option>
+                <option value="custom">Custom Model...</option>
+              </select>
+            </div>
+            <div class="field hidden" id="nvidiaCustomModelField">
+              <label>Custom Model Name</label>
+              <input type="text" id="nvidiaCustomModel" placeholder="vendor/model-name">
+            </div>
+          </div>
+
+          <!-- HuggingFace -->
+          <div class="provider" id="prov-hf">
+            <div class="provider-head">
+              <div class="provider-name">🤗 HuggingFace <span class="tag tag-free">Free Tier</span></div>
+              <label class="toggle"><input type="checkbox" id="useHf" onchange="selectProvider('hf')"><span class="sl"></span></label>
+            </div>
+            <div class="field">
+              <label>API Key (optional — works without it)</label>
+              <input type="text" id="hfKey" placeholder="hf_xxxxxxxxxxxxx">
+            </div>
+            <div class="field">
+              <label>Model</label>
+              <div class="model-list">
+                <button class="model-chip active" data-m="stabilityai/stable-diffusion-xl-base-1.0" onclick="pickHFModel(this)">SDXL</button>
+                <button class="model-chip" data-m="stabilityai/stable-video-diffusion-img2vid-xt" onclick="pickHFModel(this)">SVD</button>
+                <button class="model-chip" data-m="runwayml/stable-diffusion-v1-5" onclick="pickHFModel(this)">SD 1.5</button>
+                <button class="model-chip" data-m="black-forest-labs/FLUX.1-dev" onclick="pickHFModel(this)">FLUX</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Endpoint -->
+          <div class="provider" id="prov-custom">
+            <div class="provider-head">
+              <div class="provider-name">🔧 Custom API (OpenAI-compatible)</div>
+              <label class="toggle"><input type="checkbox" id="useCustom" onchange="selectProvider('custom')"><span class="sl"></span></label>
+            </div>
+            <div class="field">
+              <label>Endpoint URL</label>
+              <input type="url" id="customEndpoint" placeholder="https://api.example.com/v1/chat/completions">
+            </div>
+            <div class="field">
+              <label>API Key</label>
+              <input type="text" id="customKey" placeholder="your-api-key">
+            </div>
+            <div class="field">
+              <label>Model Name</label>
+              <input type="text" id="customModel" placeholder="model-name">
+            </div>
+          </div>
+
+          <div style="font-size:.65rem;color:var(--text3);margin-top:6px">
+            💡 AI enhances your prompt and/or generates background images. Works without AI too — procedural generation is always available.
+          </div>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <div class="panel fade-in" style="animation-delay:.2s;padding:12px">
+        <button class="btn btn-primary" id="genBtn" onclick="startGeneration()">
+          ⚡ Generate Video
+        </button>
+        <div style="height:8px"></div>
+        <div class="field-row">
+          <button class="btn btn-outline btn-sm" onclick="genSVG()">📐 Generate SVG</button>
+          <button class="btn btn-outline btn-sm" onclick="genGIF()">🖼️ Export GIF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Preview & Output -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- Preview Panel -->
+      <div class="panel fade-in" style="animation-delay:.05s">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">📺</span> Preview</div>
+          <div id="resInfo" style="font-size:.65rem;color:var(--text3)">1280×720</div>
+        </div>
+        <div class="preview-wrap" id="previewWrap">
+          <canvas id="preview" class="preview-canvas" width="1280" height="720"></canvas>
+          <video id="outputVideo" class="hidden" controls playsinline></video>
+          <div class="preview-ph" id="previewPlaceholder">
+            <div class="phi">🎬</div>
+            <div>Your video preview will appear here</div>
+            <div style="font-size:.7rem;color:var(--text3)">Type a prompt and click Generate</div>
+          </div>
+          <span class="wmark">NovaVid AI</span>
+        </div>
+
+        <div class="prog-wrap">
+          <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+          <div class="prog-info">
+            <span id="statusText">Ready</span>
+            <span id="etaText"></span>
+          </div>
+        </div>
+
+        <div class="stats hidden" id="statsRow">
+          <div class="stat"><div class="stat-val" id="sFrames">0</div><div class="stat-lbl">Frames</div></div>
+          <div class="stat"><div class="stat-val" id="sTime">0s</div><div class="stat-lbl">Render</div></div>
+          <div class="stat"><div class="stat-val" id="sSize">0</div><div class="stat-lbl">Size</div></div>
+          <div class="stat"><div class="stat-val" id="sRes">-</div><div class="stat-lbl">Res</div></div>
+        </div>
+
+        <div id="actionBtns" class="hidden" style="margin-top:10px">
+          <div class="field-row">
+            <button class="btn btn-success btn-sm" onclick="downloadVid()">💾 Download Video</button>
+            <button class="btn btn-outline btn-sm" onclick="resetVid()">🔄 New</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SVG Output Panel -->
+      <div class="panel hidden" id="svgPanel">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">📐</span> SVG Output</div>
+          <button class="btn btn-outline btn-sm" style="width:auto;padding:5px 12px" onclick="downloadSVG()">💾 Save SVG</button>
+        </div>
+        <div class="svg-preview" id="svgPreview"></div>
+      </div>
+
+      <!-- Log Panel -->
+      <div class="panel fade-in" style="animation-delay:.2s">
+        <div class="panel-head">
+          <div class="panel-title"><span class="icon">📋</span> Log</div>
+          <span style="font-size:.65rem;color:var(--text3);cursor:pointer" onclick="clearLog()">Clear</span>
+        </div>
+        <div class="log" id="logBox">
+          <div>[ready] NovaVid AI loaded</div>
+          <div>[ready] Canvas renderer active</div>
+          <div>[ready] MediaRecorder: <span id="codecInfo">checking...</span></div>
+          <div>[ready] Waiting for input...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<canvas id="renderCanvas" style="display:none"></canvas>
+
+<script>
+// ═══════════════════════════════════════════
+//  NovaVid AI — Core Engine
+// ═══════════════════════════════════════════
+
+const S = {
+  style: 'cinematic',
+  ratio: '16:9',
+  generating: false,
+  chunks: [],
+  aiImage: null,
+  startTs: 0,
+  totalFrames: 0,
+  animId: null,
+  selectedHFModel: 'stabilityai/stable-diffusion-xl-base-1.0',
+  activeProvider: 'nvidia',
+  blob: null,
+  svgContent: ''
+};
+
+// ─── Init ───
+window.addEventListener('load', () => {
+  checkCodec();
+  drawPlaceholder();
+  updateResInfo();
+  document.getElementById('nvidiaModel').addEventListener('change', function(){
+    document.getElementById('nvidiaCustomModelField').classList.toggle('hidden', this.value !== 'custom');
+  });
+});
+
+function $(id){ return document.getElementById(id) }
+function log(m){
+  const d=document.createElement('div');
+  d.textContent=`[${ts()}] ${m}`;
+  $('logBox').appendChild(d);
+  $('logBox').scrollTop=$('logBox').scrollHeight;
+}
+function clearLog(){ $('logBox').innerHTML=''; }
+function ts(){ return new Date().toLocaleTimeString('en',{hour12:false}); }
+function toast(msg, type='success'){
+  const t=document.createElement('div');
+  t.className='toast toast-'+type;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+function setStatus(m){ $('statusText').textContent=m; }
+function setProg(p){ $('progFill').style.width=p+'%'; }
+function setETA(s){ $('etaText').textContent=s>0?`ETA: ${s}s`:''; }
+
+function checkCodec(){
+  const el=$('codecInfo');
+  if(typeof MediaRecorder==='undefined'){el.textContent='✗ N/A';return}
+  ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].forEach(c=>{
+    if(MediaRecorder.isTypeSupported(c)){el.textContent=c.split(';')[1]||'WebM';return}
+  });
+}
+
+function setP(t){ $('prompt').value=t; }
+
+function pickStyle(b){
+  document.querySelectorAll('.style-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.style=b.dataset.s;
+}
+
+function pickRatio(b){
+  document.querySelectorAll('.ratio-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.ratio=b.dataset.r;
+  updateResInfo(); updatePreviewAspect();
+}
+
+function pickHFModel(b){
+  document.querySelectorAll('.model-chip').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); S.selectedHFModel=b.dataset.m;
+}
+
+function selectProvider(p){
+  S.activeProvider=p;
+  document.querySelectorAll('.provider').forEach(x=>x.classList.remove('active'));
+  $('prov-'+p).classList.add('active');
+  // Uncheck others
+  if(p==='nvidia'){$('useHf').checked=false;$('useCustom').checked=false}
+  else if(p==='hf'){$('useNvidia').checked=false;$('useCustom').checked=false}
+  else{$('useNvidia').checked=false;$('useHf').checked=false}
+  $('useNvidia').checked=p==='nvidia';
+  $('useHf').checked=p==='hf';
+  $('useCustom').checked=p==='custom';
+}
+
+function toggleAI(){
+  $('aiConfig').classList.toggle('hidden', !$('aiEnabled').checked);
+}
+
+function updateResInfo(){
+  const h=parseInt($('quality').value);
+  const [aw,ah]=S.ratio.split(':').map(Number);
+  const w=Math.round(h*aw/ah);
+  const ww=w%2?w+1:w, hh=h%2?h+1:h;
+  $('resInfo').textContent=`${ww}×${hh} (${S.ratio})`;
+}
+
+function updatePreviewAspect(){
+  const wrap=$('previewWrap');
+  wrap.className='preview-wrap';
+  const ratioMap={'16:9':'','9:16':'r916','1:1':'r11','4:3':'r43','21:9':'r21','2.39:1':'r239','3:4':'r916','4:5':'r916'};
+  if(ratioMap[S.ratio]) wrap.classList.add(ratioMap[S.ratio]);
+}
+
+// ─── Color Utils ───
+function hsl(h,s,l){return `hsl(${h%360},${s}%,${l}%)`}
+function hsla(h,s,l,a){return `hsla(${h%360},${s}%,${l}%,${a})`}
+function rand(a,b){return a+Math.random()*(b-a)}
+
+// ─── Placeholder ───
+function drawPlaceholder(){
+  const c=$('preview'),ctx=c.getContext('2d');
+  c.width=640;c.height=360;
+  const g=ctx.createLinearGradient(0,0,640,360);
+  g.addColorStop(0,'#0a0a1e');g.addColorStop(1,'#1a1a3e');
+  ctx.fillStyle=g;ctx.fillRect(0,0,640,360);
+  ctx.font='18px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='#3a3a5a';ctx.fillText('✨ Enter a prompt to begin',320,180);
+}
+
+// ─── Text Wrapping ───
+function wrapText(ctx,text,x,y,maxW,lh){
+  const words=text.split(/\s+/);let line='',lines=[];
+  for(const w of words){
+    const t=line+w+' ';
+    if(ctx.measureText(t).width>maxW&&line){lines.push(line.trim());line=w+' '}
+    else line=t;
+  }
+  lines.push(line.trim());
+  const th=lines.length*lh;
+  lines.forEach((l,i)=>ctx.fillText(l,x,y-th/2+lh*i+lh/2));
+  return lines.length;
+}
+
+// ═══════════════════════════════════════════
+//  AI Integration
+// ═══════════════════════════════════════════
+
+async function aiEnhancePrompt(prompt){
+  if(!$('aiEnabled').checked) return prompt;
+  try{
+    if(S.activeProvider==='nvidia'){
+      return await nvidiaCall(prompt);
+    } else if(S.activeProvider==='custom'){
+      return await customCall(prompt);
+    }
+  }catch(e){
+    log('AI prompt enhancement failed: '+e.message);
+  }
+  return prompt;
+}
+
+async function nvidiaCall(prompt){
+  const key=$('nvidiaKey').value.trim();
+  const endpoint=$('nvidiaEndpoint').value.trim();
+  const modelSel=$('nvidiaModel').value;
+  const model=modelSel==='custom'?$('nvidiaCustomModel').value.trim():modelSel;
+  if(!key){log('NVIDIA: No API key provided, skipping');return prompt}
+  if(!endpoint){log('NVIDIA: No endpoint, skipping');return prompt}
+  log('NVIDIA: Enhancing prompt via '+model);
+  const resp=await fetch(endpoint,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({
+      model:model,
+      messages:[
+        {role:'system',content:'You are a creative video director. Given a text prompt, return a vivid, cinematic description for generating a motion graphics video. Be specific about colors, movements, camera angles, and atmosphere. Return ONLY the enhanced description, no explanations.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.8,max_tokens:300,stream:false
+    })
+  });
+  if(!resp.ok){
+    const err=await resp.text();
+    log('NVIDIA API error: '+resp.status+' — '+err.substring(0,100));
+    throw new Error('NVIDIA API '+resp.status);
+  }
+  const data=await resp.json();
+  const enhanced=data.choices?.[0]?.message?.content?.trim()||prompt;
+  log('NVIDIA: Enhanced → "'+enhanced.substring(0,60)+'..."');
+  return enhanced;
+}
+
+async function customCall(prompt){
+  const key=$('customKey').value.trim();
+  const endpoint=$('customEndpoint').value.trim();
+  const model=$('customModel').value.trim();
+  if(!endpoint||!model){log('Custom: Missing config');return prompt}
+  log('Custom: Calling '+endpoint);
+  const headers={'Content-Type':'application/json'};
+  if(key) headers['Authorization']='Bearer '+key;
+  const resp=await fetch(endpoint,{
+    method:'POST',headers,
+    body:JSON.stringify({
+      model,
+      messages:[
+        {role:'system',content:'You are a motion graphics director. Enhance this into a vivid video description with colors, movements, atmosphere. Return ONLY the enhanced description.'},
+        {role:'user',content:prompt}
+      ],
+      temperature:0.8,max_tokens:300,stream:false
+    })
+  });
+  if(!resp.ok) throw new Error('Custom API '+resp.status);
+  const data=await resp.json();
+  return data.choices?.[0]?.message?.content?.trim()||prompt;
+}
+
+async function aiFetchImage(prompt){
+  if(!$('aiEnabled').checked || S.activeProvider!=='hf') return null;
+  const key=$('hfKey').value.trim();
+  const headers={};
+  if(key) headers['Authorization']='Bearer '+key;
+  try{
+    log('HuggingFace: Generating image...');
+    setStatus('🤖 AI generating background...');
+    const resp=await fetch('https://api-inference.huggingface.co/models/'+S.selectedHFModel,{
+      method:'POST',
+      headers:{...headers,'Content-Type':'application/json'},
+      body:JSON.stringify({inputs:prompt,options:{wait_for_model:true}})
+    });
+    if(!resp.ok){log('HF error: '+resp.status);return null}
+    const blob=await resp.blob();
+    const url=URL.createObjectURL(blob);
+    const img=new Image();img.crossOrigin='anonymous';
+    return new Promise(r=>{img.onload=()=>r(img);img.onerror=()=>r(null);img.src=url});
+  }catch(e){log('HF image skipped: '+e.message);return null}
+}
+
+// ═══════════════════════════════════════════
+//  Scene Renderers
+// ═══════════════════════════════════════════
+
+const scenes = {
+  cinematic(f,n,ctx,w,h,txt){
+    const t=f/n, spd=parseFloat($('speed').value);
+    const st=t*spd;
+    const tc=$('textColor').value;
+    const fs=parseInt($('fontSize').value)*w/1280;
+    // Sky
+    const sg=ctx.createLinearGradient(0,0,0,h*0.65);
+    sg.addColorStop(0,hsla(230+st*30,60,8+st*12,1));
+    sg.addColorStop(0.5,hsla(260+st*20,50,18+st*15,1));
+    sg.addColorStop(1,hsla(280+st*15,40,25+st*10,1));
+    ctx.fillStyle=sg;ctx.fillRect(0,0,w,h);
+    // Sun
+    const sx=w*0.3+st*w*0.3, sy=h*0.1+Math.sin(st*Math.PI)*h*0.2;
+    const sGrad=ctx.createRadialGradient(sx,sy,0,sx,sy,w*0.12);
+    sGrad.addColorStop(0,'rgba(255,220,120,0.9)');sGrad.addColorStop(0.3,'rgba(255,160,60,0.4)');sGrad.addColorStop(1,'rgba(255,100,50,0)');
+    ctx.fillStyle=sGrad;ctx.fillRect(0,0,w,h);
+    // Stars
+    for(let i=0;i<40;i++){
+      const x2=(i*173.7)%w,y2=(i*89.3)%h*0.4;
+      ctx.fillStyle=`rgba(255,255,255,${0.2+Math.sin(f*0.05+i)*0.3})`;
+      ctx.beginPath();ctx.arc(x2,y2,0.8,0,Math.PI*2);ctx.fill();
+    }
+    // Mountains
+    for(let l=0;l<3;l++){
+      ctx.fillStyle=`rgba(${15+l*12},${12+l*8},${30+l*15},${0.4+l*0.2})`;
+      ctx.beginPath();ctx.moveTo(0,h);
+      for(let x=0;x<=w;x+=15){
+        ctx.lineTo(x,h*(0.5+l*0.08)+Math.sin(x*0.006+l*1.5+st*1.5)*h*0.08+Math.sin(x*0.015+l)*h*0.03);
+      }
+      ctx.lineTo(w,h);ctx.fill();
+    }
+    // Water
+    const wg=ctx.createLinearGradient(0,h*0.68,0,h);
+    wg.addColorStop(0,'rgba(8,15,40,0.85)');wg.addColorStop(1,'rgba(3,8,25,1)');
+    ctx.fillStyle=wg;ctx.fillRect(0,h*0.68,w,h*0.32);
+    // Ripples
+    for(let i=0;i<20;i++){
+      const rx=((w*0.05+i*w*0.05+st*w*0.15)%w);
+      const ry=h*0.72+Math.sin(f*0.08+i*1.7)*h*0.04;
+      ctx.strokeStyle=`rgba(180,160,130,${0.06+Math.sin(f*0.06+i)*0.03})`;
+      ctx.lineWidth=1;ctx.beginPath();ctx.ellipse(rx,ry,25+Math.sin(f*0.04+i)*12,2.5,0,0,Math.PI*2);ctx.stroke();
+    }
+    // Text
+    const ta=t<0.12?t/0.12:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`bold ${fs}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=fs*0.4;
+    wrapText(ctx,txt,w/2,h*0.42,w*0.75,fs*1.3);ctx.restore();
+  },
+
+  particles(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle=`rgba(5,5,20,0.12)`;ctx.fillRect(0,0,w,h);
+    for(let i=0;i<250;i++){
+      const seed=i*137.508, a=seed+t*Math.PI*4*parseFloat($('speed').value);
+      const r=(Math.sin(seed*3+t*Math.PI*2)*0.5+0.5)*Math.min(w,h)*0.44;
+      const px=w/2+Math.cos(a)*r, py=h/2+Math.sin(a)*r;
+      const hue=(seed+t*120)%360, sz=1+Math.sin(seed*7+f*0.1)*2;
+      ctx.fillStyle=hsla(hue,80,60,0.5+Math.sin(seed*5+f*0.05)*0.3);
+      ctx.beginPath();ctx.arc(px,py,sz,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle=hsla(hue,80,60,0.04);ctx.lineWidth=0.5;
+      ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(w/2,h/2);ctx.stroke();
+    }
+    const cg=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,w*0.08);
+    cg.addColorStop(0,'rgba(255,255,255,0.08)');cg.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=cg;ctx.fillRect(0,0,w,h);
+    const ta=t<0.1?t/0.1:t>0.9?(1-t)/0.1:1;
+    ctx.save();ctx.font=`bold ${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=25;
+    wrapText(ctx,txt,w/2,h/2,w*0.7,fs*1.3);ctx.restore();
+  },
+
+  gradient(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle=$('bgColor').value;ctx.fillRect(0,0,w,h);
+    for(let i=0;i<6;i++){
+      const cx=w*0.5+Math.sin(t*Math.PI*2+i*1.3)*w*0.3;
+      const cy=h*0.5+Math.cos(t*Math.PI*2+i*0.9)*h*0.3;
+      const r=w*0.2+Math.sin(t*Math.PI*4+i*2)*w*0.06;
+      const hue=(t*360+i*60)%360;
+      const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+      g.addColorStop(0,hsla(hue,80,50,0.35));g.addColorStop(1,hsla(hue,80,50,0));
+      ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    }
+    const ta=t<0.1?t/0.1:t>0.9?(1-t)/0.1:1;
+    ctx.save();ctx.font=`bold ${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=20;
+    wrapText(ctx,txt,w/2,h/2,w*0.7,fs*1.3);ctx.restore();
+  },
+
+  typography(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle=$('bgColor').value;ctx.globalAlpha=0.97;ctx.fillRect(0,0,w,h);ctx.globalAlpha=1;
+    const words=txt.split(/\s+/), wc=words.length;
+    // Scrolling bg text
+    for(let i=0;i<15;i++){
+      ctx.save();ctx.font=`${8+i%4*2}px monospace`;ctx.fillStyle='rgba(255,255,255,0.025)';
+      ctx.fillText(txt,(w*0.05+i*w*0.07+t*w*0.1)%w,(i*137.3)%h);ctx.restore();
+    }
+    const ac=hsl((t*360)%360,80,60);
+    words.forEach((word,i)=>{
+      const lt=(t*2.5-i/wc)%1;
+      if(lt<0||lt>1)return;
+      const wfs=fs*(0.5+lt*0.5);
+      const y=h*(0.15+i/wc*0.7);
+      const x=w*0.5+Math.sin(lt*Math.PI+i)*w*0.03;
+      const a=lt<0.15?lt/0.15:lt>0.8?(1-lt)/0.2:1;
+      ctx.save();ctx.font=`${wfs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.globalAlpha=a;ctx.fillStyle=i%2===0?tc:ac;ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=12;
+      ctx.fillText(word,x,y);ctx.restore();
+    });
+    // Lines
+    ctx.strokeStyle=`rgba(124,58,237,${0.15+Math.sin(t*Math.PI*2)*0.08})`;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(w*0.08,h*0.08);ctx.lineTo(w*0.92,h*0.08);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(w*0.08,h*0.92);ctx.lineTo(w*0.92,h*0.92);ctx.stroke();
+  },
+
+  waves(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280, spd=parseFloat($('speed').value);
+    const bg=ctx.createLinearGradient(0,0,0,h);
+    bg.addColorStop(0,hsla(240,60,6,1));bg.addColorStop(1,hsla(270,50,10,1));
+    ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+    for(let l=0;l<8;l++){
+      const hue=(200+l*20+t*60*spd)%360, by=h*(0.28+l*0.08), amp=h*0.04+Math.sin(t*Math.PI*2+l)*h*0.02;
+      ctx.fillStyle=hsla(hue,70,50,0.07+l*0.025);
+      ctx.beginPath();ctx.moveTo(0,h);
+      for(let x=0;x<=w;x+=3){
+        ctx.lineTo(x,by+Math.sin(x*0.004+t*Math.PI*2*spd+l*0.8)*amp+Math.cos(x*0.008+t*3*spd+l)*amp*0.5);
+      }
+      ctx.lineTo(w,h);ctx.fill();
+    }
+    const ta=t<0.1?t/0.1:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=18;
+    wrapText(ctx,txt,w/2,h/2,w*0.8,fs*1.3);ctx.restore();
+  },
+
+  matrix(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle='rgba(0,0,0,0.07)';ctx.fillRect(0,0,w,h);
+    const chars=txt+'01∆Ωλπ∞{}[]<>/\\|';
+    const cw=Math.max(12,14*w/1280), cols=Math.ceil(w/cw);
+    ctx.font=`${Math.round(cw)}px monospace`;
+    for(let c=0;c<cols;c++){
+      const speed=2+((c*37)%5);
+      const y=((f*speed+c*137)%h);
+      for(let dy=0;dy<Math.floor(h/cw/2);dy++){
+        const cy=y-dy*cw;
+        if(cy<0||cy>h)continue;
+        const a=1-dy/(h/cw/2);
+        ctx.fillStyle=dy===0?`rgba(255,255,255,${a})`:`rgba(0,255,70,${a*0.6})`;
+        ctx.fillText(chars[(c+dy+f)%chars.length],c*cw,cy);
+      }
+    }
+    const ta=t<0.12?t/0.12:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`bold ${fs*0.8}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    const tm=ctx.measureText(txt), tw=tm.width+40, th=fs+30;
+    ctx.fillStyle='rgba(0,0,0,0.75)';
+    roundRect(ctx,w/2-tw/2,h/2-th/2,tw,th,8);ctx.fill();
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor='#00ff44';ctx.shadowBlur=12;
+    wrapText(ctx,txt,w/2,h/2,w*0.8,fs);ctx.restore();
+  },
+
+  fire(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle='rgba(5,0,0,0.1)';ctx.fillRect(0,0,w,h);
+    for(let i=0;i<350;i++){
+      const seed=i*73.7;
+      const x=w*0.1+Math.sin(seed*0.1+f*0.05)*w*0.1+((seed*w*0.013)%w*0.8);
+      const by=h*0.95, speed=1+((seed*3)%3);
+      const y=by-((f*speed+seed)%h*0.65);
+      const life=1-(by-y)/(h*0.65), sz=(2+Math.sin(seed)*3)*life;
+      ctx.fillStyle=hsla(10+life*30,100,30+life*40,life*0.55);
+      ctx.beginPath();ctx.arc(x+Math.sin(f*0.1+seed)*5,y,sz,0,Math.PI*2);ctx.fill();
+    }
+    const bg=ctx.createLinearGradient(0,h*0.75,0,h);
+    bg.addColorStop(0,'rgba(255,80,0,0)');bg.addColorStop(1,'rgba(255,50,0,0.25)');
+    ctx.fillStyle=bg;ctx.fillRect(0,h*0.75,w,h*0.25);
+    const ta=t<0.1?t/0.1:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`bold ${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor='#ff4400';ctx.shadowBlur=20;
+    wrapText(ctx,txt,w/2,h*0.38,w*0.75,fs*1.3);ctx.restore();
+  },
+
+  stars(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle='rgba(2,2,10,0.95)';ctx.fillRect(0,0,w,h);
+    for(let i=0;i<180;i++){
+      const seed=i*97.3;
+      const x=(seed*w*0.0271+Math.sin(seed)*w*0.1)%w;
+      const y=(seed*h*0.0173+Math.cos(seed*2)*h*0.1)%h;
+      const tw2=0.3+Math.sin(f*0.1+seed*3)*0.7;
+      ctx.fillStyle=`rgba(255,255,255,${tw2*0.7})`;
+      ctx.beginPath();ctx.arc(x,y,0.5+((seed*7)%2)*tw2,0,Math.PI*2);ctx.fill();
+    }
+    const shT=(t*3)%1;
+    if(shT<0.3){
+      const sx=w*shT*3.3, sy=h*0.1+shT*h*0.25;
+      ctx.strokeStyle=`rgba(255,255,255,${(0.3-shT)/0.3})`;ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx-50,sy-18);ctx.stroke();
+    }
+    const nx=w*0.5+Math.sin(t*Math.PI)*w*0.1, ny=h*0.4;
+    const ng=ctx.createRadialGradient(nx,ny,0,nx,ny,w*0.28);
+    ng.addColorStop(0,hsla((t*360)%360,60,50,0.04+Math.sin(t*Math.PI*2)*0.02));ng.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=ng;ctx.fillRect(0,0,w,h);
+    const ta=t<0.1?t/0.1:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=14;
+    wrapText(ctx,txt,w/2,h/2,w*0.8,fs*1.3);ctx.restore();
+  },
+
+  geometric(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle=$('bgColor').value;ctx.fillRect(0,0,w,h);
+    for(let i=0;i<14;i++){
+      const angle=t*Math.PI*2+i/14*Math.PI*2;
+      const dist=Math.min(w,h)*0.24+Math.sin(t*Math.PI*4+i)*Math.min(w,h)*0.08;
+      const cx=w/2+Math.cos(angle)*dist, cy=h/2+Math.sin(angle)*dist;
+      const sides=3+((i*5)%5), rot=t*Math.PI*2+i;
+      const sz=18+w*0.01+Math.sin(f*0.08+i*2)*12;
+      const hue=(i/14*360+t*60)%360;
+      ctx.save();ctx.translate(cx,cy);ctx.rotate(rot);
+      ctx.strokeStyle=hsla(hue,70,60,0.25+Math.sin(f*0.05+i)*0.12);ctx.lineWidth=1.5;
+      ctx.beginPath();for(let s=0;s<=sides;s++){const sa=s/sides*Math.PI*2;ctx.lineTo(Math.cos(sa)*sz,Math.sin(sa)*sz)}
+      ctx.stroke();ctx.restore();
+    }
+    ctx.save();ctx.translate(w/2,h/2);ctx.rotate(t*Math.PI);
+    ctx.strokeStyle='rgba(124,58,237,0.18)';ctx.lineWidth=1.5;ctx.beginPath();
+    for(let s=0;s<=6;s++){const a=s/6*Math.PI*2;ctx.lineTo(Math.cos(a)*70,Math.sin(a)*70)}
+    ctx.stroke();ctx.restore();
+    ctx.save();ctx.font=`bold ${fs*0.85}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=16;
+    wrapText(ctx,txt,w/2,h/2,w*0.7,fs*1.2);ctx.restore();
+  },
+
+  liquid(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280,spd=parseFloat($('speed').value);
+    ctx.fillStyle=$('bgColor').value;ctx.fillRect(0,0,w,h);
+    for(let l=0;l<5;l++){
+      ctx.beginPath();
+      const hue=(180+l*40+t*80*spd)%360;
+      ctx.fillStyle=hsla(hue,70,50,0.06+l*0.03);
+      for(let x=0;x<=w;x+=4){
+        const y=h/2+Math.sin(x*0.008+t*Math.PI*2*spd+l*1.2)*h*0.15+Math.sin(x*0.015+t*3*spd+l*2)*h*0.08+Math.cos(x*0.003+t*spd+l)*h*0.05;
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();
+    }
+    const ta=t<0.1?t/0.1:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`bold ${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=20;
+    wrapText(ctx,txt,w/2,h/2,w*0.75,fs*1.3);ctx.restore();
+  },
+
+  glitch(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    ctx.fillStyle=$('bgColor').value;ctx.fillRect(0,0,w,h);
+    // Scanlines
+    for(let y=0;y<h;y+=3){ctx.fillStyle='rgba(255,255,255,0.015)';ctx.fillRect(0,y,w,1)}
+    // Glitch bars
+    if(Math.random()>0.7){
+      const gy=Math.random()*h, gh=2+Math.random()*20;
+      const off=(Math.random()-0.5)*30;
+      ctx.fillStyle=hsla(Math.random()*360,80,50,0.15);
+      ctx.fillRect(off,gy,w,gh);
+    }
+    // RGB split text
+    const off=2+Math.sin(t*Math.PI*8)*4;
+    const ta=t<0.1?t/0.1:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`bold ${fs}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta*0.6;ctx.fillStyle='#ff0000';wrapText(ctx,txt,w/2-off,h/2,w*0.7,fs*1.3);
+    ctx.fillStyle='#00ff00';wrapText(ctx,txt,w/2,h/2,w*0.7,fs*1.3);
+    ctx.fillStyle='#0000ff';wrapText(ctx,txt,w/2+off,h/2,w*0.7,fs*1.3);
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;
+    wrapText(ctx,txt,w/2,h/2,w*0.7,fs*1.3);ctx.restore();
+  },
+
+  retro(f,n,ctx,w,h,txt){
+    const t=f/n,tc=$('textColor').value,fs=parseInt($('fontSize').value)*w/1280;
+    // VHS look
+    ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,w,h);
+    // Scanlines
+    for(let y=0;y<h;y+=2){ctx.fillStyle='rgba(0,0,0,0.3)';ctx.fillRect(0,y,w,1)}
+    // Color bars at top
+    const barH=h*0.03;
+    const colors=['#fff','#ff0','#0ff','#0f0','#f0f','#f00','#00f'];
+    colors.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(i*w/7,0,w/7,barH)});
+    // VHS tracking lines
+    const trackY=(t*h*3)%h;
+    ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(0,trackY,w,3);
+    // Static noise
+    if(Math.random()>0.8){
+      for(let i=0;i<50;i++){
+        ctx.fillStyle=`rgba(255,255,255,${Math.random()*0.1})`;
+        ctx.fillRect(Math.random()*w,Math.random()*h,Math.random()*3,1);
+      }
+    }
+    // Text with CRT glow
+    const ta=t<0.1?t/0.1:t>0.85?(1-t)/0.15:1;
+    ctx.save();ctx.font=`bold ${fs}px "Courier New",monospace`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=ta;ctx.fillStyle=tc;ctx.shadowColor=tc;ctx.shadowBlur=15;
+    wrapText(ctx,txt,w/2,h/2,w*0.7,fs*1.4);ctx.restore();
+    // Vignette
+    const vg=ctx.createRadialGradient(w/2,h/2,w*0.3,w/2,h/2,w*0.7);
+    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.5)');
+    ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
+  }
+};
+
+function roundRect(ctx,x,y,w2,h2,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w2-r,y);ctx.quadraticCurveTo(x+w2,y,x+w2,y+r);
+  ctx.lineTo(x+w2,y+h2-r);ctx.quadraticCurveTo(x+w2,y+h2,x+w2-r,y+h2);
+  ctx.lineTo(x+r,y+h2);ctx.quadraticCurveTo(x,y+h2,x,y+h2-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+// ═══════════════════════════════════════════
+//  Video Generation Engine
+// ═══════════════════════════════════════════
+
+async function startGeneration(){
+  if(S.generating)return;
+  const prompt=$('prompt').value.trim();
+  if(!prompt){toast('Enter a prompt first!','error');return}
+
+  S.generating=true;S.chunks=[];S.aiImage=null;S.startTs=Date.now();
+  const btn=$('genBtn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Generating...';
+
+  const duration=parseInt($('duration').value);
+  const fps=parseInt($('fps').value);
+  const quality=parseInt($('quality').value);
+  const [aw,ah]=S.ratio.split(':').map(Number);
+  let cw,ch;
+  if(aw>=ah){ch=quality;cw=Math.round(quality*aw/ah)}else{cw=quality;ch=Math.round(quality*ah/aw)}
+  cw=cw%2?cw+1:cw;ch=ch%2?ch+1:ch;
+  S.totalFrames=duration*fps;
+
+  const canvas=$('renderCanvas');canvas.width=cw;canvas.height=ch;
+  const ctx=canvas.getContext('2d',{willReadFrequently:false});
+
+  const preview=$('preview');preview.width=cw;preview.height=ch;
+  const pCtx=preview.getContext('2d');
+
+  $('previewPlaceholder').classList.add('hidden');
+
+  log(`Render: ${cw}×${ch} @ ${fps}fps, ${duration}s (${S.totalFrames} frames)`);
+  log(`Style: ${S.style} | Ratio: ${S.ratio}`);
+
+  // AI enhance
+  let finalPrompt=prompt;
+  if($('aiEnabled').checked){
+    setStatus('🤖 Enhancing prompt with AI...');
+    finalPrompt=await aiEnhancePrompt(prompt);
+    log('Final prompt: "'+finalPrompt.substring(0,60)+'..."');
+  }
+
+  // AI image
+  if($('aiEnabled').checked && S.activeProvider==='hf'){
+    S.aiImage=await aiFetchImage(finalPrompt);
+    if(S.aiImage) log('AI background image loaded');
+  }
+
+  // Setup recorder
+  const stream=canvas.captureStream(fps);
+  let mimeType='video/webm;codecs=vp9';
+  if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='video/webm;codecs=vp8';
+  if(!MediaRecorder.isTypeSupported(mimeType)) mimeType='video/webm';
+
+  const bitrate=cw>=1920?8000000:cw>=1280?5000000:2500000;
+  const recorder=new MediaRecorder(stream,{mimeType,videoBitsPerSecond:bitrate});
+  recorder.ondataavailable=e=>{if(e.data.size>0)S.chunks.push(e.data)};
+  recorder.onstop=()=>finishRender(cw,ch,duration,fps);
+  recorder.start(100);
+
+  // Render loop
+  const renderFn=scenes[S.style];
+  let frame=0;
+  const startTime=performance.now();
+
+  function loop(){
+    if(frame>=S.totalFrames){
+      recorder.stop();
+      cancelAnimationFrame(S.animId);
+      return;
+    }
+    ctx.clearRect(0,0,cw,ch);
+    // AI background
+    if(S.aiImage){
+      ctx.drawImage(S.aiImage,0,0,cw,ch);
+      ctx.fillStyle='rgba(0,0,0,0.35)';ctx.fillRect(0,0,cw,ch);
+    }
+    renderFn(frame,S.totalFrames,ctx,cw,ch,finalPrompt);
+    pCtx.drawImage(canvas,0,0);
+    const pct=Math.round((frame/S.totalFrames)*100);
+    setProg(pct);
+    const elapsed=(performance.now()-startTime)/1000;
+    const eta=Math.max(0,Math.round((S.totalFrames-frame)/(frame+1)*elapsed));
+    setStatus(`Rendering frame ${frame+1}/${S.totalFrames}`);
+    setETA(eta);
+    frame++;
+    S.animId=requestAnimationFrame(loop);
+  }
+  S.animId=requestAnimationFrame(loop);
+}
+
+function finishRender(cw,ch,dur,fps){
+  const elapsed=((Date.now()-S.startTs)/1000).toFixed(1);
+  S.blob=new Blob(S.chunks,{type:'video/webm'});
+  const url=URL.createObjectURL(S.blob);
+  const video=$('outputVideo');video.src=url;video.classList.remove('hidden');
+  $('preview').classList.add('hidden');
+
+  const sizeMB=(S.blob.size/(1024*1024)).toFixed(2);
+  $('sFrames').textContent=dur*fps;
+  $('sTime').textContent=elapsed+'s';
+  $('sSize').textContent=sizeMB+'MB';
+  $('sRes').textContent=`${cw}×${ch}`;
+  $('statsRow').classList.remove('hidden');
+  $('actionBtns').classList.remove('hidden');
+
+  setProg(100);setStatus('✅ Video ready!');setETA(0);
+  log(`Done! ${dur*fps} frames in ${elapsed}s (${sizeMB} MB)`);
+
+  const btn=$('genBtn');btn.disabled=false;btn.innerHTML='⚡ Generate Video';
+  S.generating=false;
+  toast('Video generated successfully!','success');
+}
+
+function downloadVid(){
+  if(!S.blob)return;
+  const a=document.createElement('a');a.href=URL.createObjectURL(S.blob);
+  const name=$('prompt').value.trim().substring(0,25).replace(/[^a-zA-Z0-9]/g,'_');
+  a.download=`novavid_${name}_${Date.now()}.webm`;a.click();
+  log('Download started');toast('Downloading...');
+}
+
+function resetVid(){
+  const video=$('outputVideo');video.classList.add('hidden');video.pause();video.src='';
+  $('preview').classList.remove('hidden');
+  $('actionBtns').classList.add('hidden');$('statsRow').classList.add('hidden');
+  setProg(0);setStatus('Ready');drawPlaceholder();
+  S.blob=null;S.aiImage=null;
+}
+
+// ═══════════════════════════════════════════
+//  SVG Generator
+// ═══════════════════════════════════════════
+
+function genSVG(){
+  const txt=$('prompt').value.trim();
+  if(!txt){toast('Enter a prompt first','error');return}
+  log('Generating SVG...');
+
+  const [aw,ah]=S.ratio.split(':').map(Number);
+  const svgW=aw>=ah?800:Math.round(800*aw/ah);
+  const svgH=aw>=ah?Math.round(800*ah/aw):800;
+  const tc=$('textColor').value;
+  const fs=parseInt($('fontSize').value);
+  const style=S.style;
+  const hue1=Math.round(Math.random()*360), hue2=(hue1+120)%360, hue3=(hue1+240)%360;
+
+  let svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}">\n`;
+  svg+=`<defs>\n`;
+  svg+=`  <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="hsl(${hue1},40%,8%)"/><stop offset="100%" stop-color="hsl(${hue2},40%,12%)"/></linearGradient>\n`;
+  svg+=`  <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${tc}" stop-opacity="0.3"/><stop offset="100%" stop-color="${tc}" stop-opacity="0"/></radialGradient>\n`;
+  svg+=`  <filter id="blur"><feGaussianBlur stdDeviation="3"/></filter>\n`;
+  svg+=`  <filter id="glow2"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>\n`;
+  svg+=`</defs>\n`;
+  svg+=`<rect width="${svgW}" height="${svgH}" fill="url(#bgGrad)"/>\n`;
+
+  // Style-specific SVG elements
+  if(style==='particles'){
+    for(let i=0;i<30;i++){
+      const x=rand(svgW*0.1,svgW*0.9), y=rand(svgH*0.1,svgH*0.9);
+      const r=rand(2,8), h2=rand(0,360);
+      svg+=`<circle cx="${x}" cy="${y}" r="${r}" fill="hsla(${h2},80%,60%,0.5)" filter="url(#blur)"/>\n`;
+    }
+    svg+=`<circle cx="${svgW/2}" cy="${svgH/2}" r="60" fill="url(#glow)"/>\n`;
+  } else if(style==='geometric'){
+    for(let i=0;i<8;i++){
+      const x=rand(svgW*0.15,svgW*0.85), y=rand(svgH*0.15,svgH*0.85);
+      const sides=3+(i%5), sz=rand(30,70), h2=(hue1+i*40)%360;
+      let points='';
+      for(let s=0;s<sides;s++){const a=s/sides*Math.PI*2-Math.PI/2;points+=`${x+Math.cos(a)*sz},${y+Math.sin(a)*sz} `}
+      svg+=`<polygon points="${points}" fill="none" stroke="hsla(${h2},70%,60%,0.4)" stroke-width="1.5"/>\n`;
+    }
+  } else if(style==='waves'){
+    for(let l=0;l<5;l++){
+      const h2=(hue1+l*30)%360, yOff=svgH*(0.3+l*0.12);
+      let d=`M0,${svgH} `;
+      for(let x=0;x<=svgW;x+=10){
+        const y=yOff+Math.sin(x*0.01+l)*40+Math.cos(x*0.02+l*2)*20;
+        d+=`L${x},${y} `;
+      }
+      d+=`L${svgW},${svgH} Z`;
+      svg+=`<path d="${d}" fill="hsla(${h2},60%,45%,${0.06+l*0.03})"/>\n`;
+    }
+  } else if(style==='fire'){
+    for(let i=0;i<40;i++){
+      const x=rand(svgW*0.1,svgW*0.9), y=rand(svgH*0.4,svgH*0.95);
+      const r=rand(3,12);
+      svg+=`<circle cx="${x}" cy="${y}" r="${r}" fill="hsla(${rand(0,40)},100%,50%,${rand(0.1,0.4)})" filter="url(#blur)"/>\n`;
+    }
+  } else if(style==='stars'){
+    for(let i=0;i<60;i++){
+      const x=rand(0,svgW), y=rand(0,svgH), r=rand(0.5,2);
+      svg+=`<circle cx="${x}" cy="${y}" r="${r}" fill="white" opacity="${rand(0.3,0.9)}"/>\n`;
+    }
+    svg+=`<circle cx="${svgW*0.6}" cy="${svgH*0.35}" r="120" fill="hsla(${hue1},50%,50%,0.06)" filter="url(#blur)"/>\n`;
+  } else if(style==='matrix'){
+    for(let i=0;i<50;i++){
+      const x=rand(0,svgW), y=rand(0,svgH);
+      svg+=`<text x="${x}" y="${y}" font-family="monospace" font-size="10" fill="hsla(120,100%,40%,${rand(0.1,0.5)})">${txt[Math.floor(rand(0,txt.length))]}</text>\n`;
+    }
+  } else {
+    // Default decorative blobs
+    for(let i=0;i<5;i++){
+      const cx=rand(svgW*0.2,svgW*0.8), cy=rand(svgH*0.2,svgH*0.8);
+      svg+=`<circle cx="${cx}" cy="${cy}" r="${rand(40,120)}" fill="hsla(${(hue1+i*50)%360},60%,40%,0.08)" filter="url(#blur)"/>\n`;
+    }
+  }
+
+  // Text
+  const lines=txt.split(/\s+/);
+  const lh=fs*1.4;
+  const startY=svgH/2-(lines.length*lh)/2+lh/2;
+  lines.forEach((line,i)=>{
+    svg+=`<text x="${svgW/2}" y="${startY+i*lh}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${fs}" font-weight="bold" fill="${tc}" filter="url(#glow2)">${escXML(line)}</text>\n`;
+  });
+
+  svg+=`</svg>`;
+  S.svgContent=svg;
+
+  $('svgPreview').innerHTML=svg;
+  $('svgPanel').classList.remove('hidden');
+  log('SVG generated');toast('SVG ready!');
+}
+
+function escXML(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+function downloadSVG(){
+  if(!S.svgContent)return;
+  const blob=new Blob([S.svgContent],{type:'image/svg+xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const name=$('prompt').value.trim().substring(0,25).replace(/[^a-zA-Z0-9]/g,'_');
+  a.download=`novavid_${name}.svg`;a.click();
+  log('SVG download started');
+}
+
+// ═══════════════════════════════════════════
+//  GIF Export
+// ═══════════════════════════════════════════
+
+async function genGIF(){
+  const txt=$('prompt').value.trim();
+  if(!txt){toast('Enter a prompt first','error');return}
+  toast('GIF export creates a frame sequence as PNG. Use a converter for animated GIF.');
+  log('Generating preview frame...');
+
+  const quality=parseInt($('quality').value);
+  const [aw,ah]=S.ratio.split(':').map(Number);
+  let cw=aw>=ah?480:Math.round(480*aw/ah);
+  let ch=aw>=ah?Math.round(480*ah/aw):480;
+
+  const canvas=document.createElement('canvas');canvas.width=cw;canvas.height=ch;
+  const ctx=canvas.getContext('2d');
+  const fn=scenes[S.style];
+  fn(50,100,ctx,cw,ch,txt);
+
+  canvas.toBlob(blob=>{
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=`novavid_frame_${Date.now()}.png`;a.click();
+    log('Frame exported as PNG');
+    toast('Frame exported!');
+  },'image/png');
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter') startGeneration();
+});
+</script>
+</body>
+</html>
